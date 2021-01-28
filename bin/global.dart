@@ -20,7 +20,7 @@ extension BoolParsing on String {
 class Global {
   static final String defaultHost = '0.0.0.0';
   static final String defaultPort = '8088';
-  static final String defaultRoot = './dcache/monitor';
+  static final String defaultRoot = './dcache/cache';
   static final String defaultCount = '5000';
   static final String defaultTimer = '1';
   static final String defaultRootRecursive = 'true';

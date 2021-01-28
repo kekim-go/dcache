@@ -18,7 +18,7 @@ class Purge {
   int timer = int.tryParse(Global.defaultTimer);
   String rootRecursive = Global.defaultRootRecursive;
   String printAll = Global.defaultPrintAll;
-
+  int numFiles = 0;
   Stopwatch _consume = Stopwatch();
   Timer _timer;
 
@@ -79,10 +79,10 @@ class Purge {
       print('$function: $exc');
     }
     finally {
-      final bool printAllFiles = printAll.parseBool();
+      final bool printAllFiles = true;//printAll.parseBool();
       if (printAllFiles) {
         final int consumed = _consume.elapsedMilliseconds;
-        print('purge: purged=$purged, consumed=$consumed <- root=$root, count=$count, printAll=$printAll');
+        // print('purge: purged=$purged, consumed=$consumed <- root=$root, count=$count, printAll=$printAll');
       }
       _consume.reset();
     }
@@ -105,10 +105,19 @@ class Purge {
               return succeed;
             const bool recursive = false;
             const bool followLinks = false;
+
+            Stopwatch watch = Stopwatch();
+            watch.start();
             final List<FileSystemEntity> files = Directory(found).listSync(
               recursive: recursive,
               followLinks: followLinks,
             );
+            watch.stop();
+            final int elapsedFileList = watch.elapsedMilliseconds;
+            int elapsedFileSort = 0;
+            int elapsedFileDelete = 0;
+
+
             const bool purgeReally = true;
             final bool purgeHere = files.length > count;
             if (printAllFiles) {
@@ -119,19 +128,31 @@ class Purge {
               }
             }
             if (purgeHere) {
-              print('> too many files in a path: path=$found, files=${files.length}, count=$count');
+              // print('> too many files in a path: path=$found, files=${files.length}, count=$count');
+              numFiles = files.length;
+
+              watch.reset();
+              watch.start();
               files.sort((a, b) {
                 final int l = (a as File).lastModifiedSync().millisecondsSinceEpoch;
                 final int r = (b as File).lastModifiedSync().millisecondsSinceEpoch;
                 return r.compareTo(l);
               });
+              watch.stop();
+              elapsedFileSort = watch.elapsedMilliseconds;
+
+              watch.reset();
+              watch.start();
               for (int i=count; i<files.length; i++) {
                 final String file = files[i].path;
                 final DateTime datetime = lastModified(file);
-                print('>>> deleted: index=$i, file=$file, datetime=$datetime');
+                // print('>>> deleted: index=$i, file=$file, datetime=$datetime');
                 if (purgeReally) delete(file);
               }
+              watch.stop();
+              elapsedFileDelete = watch.elapsedMilliseconds;
             }
+            print('$numFiles,$elapsedFileList,$elapsedFileSort,$elapsedFileDelete,${elapsedFileList+elapsedFileSort+elapsedFileDelete}');
             succeed = true;
           }
           catch (exc) {
