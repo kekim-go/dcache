@@ -14,6 +14,8 @@ doc/api/
 # MacOS
 .DS_Store
 
-# Test Images Files
-*.webp
+# Test Files
 cache*/
+*.webp
+*.test
+*.csv
