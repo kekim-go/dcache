@@ -6,4 +6,4 @@ docker run -d -it \
 --env-file=dcache.env \
 -v /home/cloud/kekim/source/dcache/dcache/cache:/app/dcache/mounted \
 --name dcache \
-dcache:0.2
+dcache:1.2.0
